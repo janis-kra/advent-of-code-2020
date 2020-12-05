@@ -2,8 +2,8 @@ use std::fs;
 use regex::Regex;
 
 struct Policy {
-    min_amount: i32,
-    max_amount: i32,
+    first_option: i32,
+    second_option: i32,
     letter: String
 }
 
@@ -39,8 +39,8 @@ fn get_policy(line: &str) -> Option<Policy> {
         let max_amount = cap.get(2).unwrap().as_str();
         let letter = cap.get(3).unwrap().as_str();
         let policy = Policy {
-            min_amount: min_amount.parse::<i32>().unwrap(),
-            max_amount: max_amount.parse::<i32>().unwrap(),
+            first_option: min_amount.parse::<i32>().unwrap(),
+            second_option: max_amount.parse::<i32>().unwrap(),
             letter: String::from(letter)
         };
         Some(policy)
@@ -60,11 +60,12 @@ fn get_password(line: &str) -> &str {
 }
 
 fn is_match(password: &str, policy: Policy) -> bool {
-    let mut amount = 0;
-    for c in password.chars() {
-        if c.to_string() == policy.letter {
-            amount += 1;
-        }
-    }
-    amount >= policy.min_amount && amount <= policy.max_amount
+    is_matching_letter(password, policy.first_option as usize, policy.letter.as_str())
+        ^ is_matching_letter(password, policy.second_option as usize, policy.letter.as_str())
 }
+
+fn is_matching_letter(password: &str, at: usize, letter: &str) -> bool {
+    let char = password.chars().nth(at - 1);
+    char.is_some() && char.unwrap().to_string() == letter
+}
+
